@@ -1,0 +1,25 @@
+[package]
+name = "svm-merkle-tree"
+version = "0.1.0"
+description = "A rust/wasm/svm-compatible merkle tree"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "svm-merkle-tree"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+use_rayon = ["rayon"]
+
+[dependencies]
+anchor-lang = "0.29.0"
+solana-program = "1.17.16"
+hex-literal = "0.4.1"
+hex = "0.4.3"
+rayon = { version = "1.8.1", optional = true }
+thiserror = "1.0.56"
