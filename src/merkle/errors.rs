@@ -14,7 +14,7 @@ pub enum MerkleError {
     #[error("Merkle tree is empty")]
     TreeEmpty,
     #[error("Invalid hash size")]
-    InvalidHashSize
+    InvalidHashSize,
 }
 
 impl From<MerkleError> for anchor_lang::error::Error {

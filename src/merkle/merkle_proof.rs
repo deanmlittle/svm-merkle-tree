@@ -7,13 +7,13 @@ use super::HashingAlgorithm;
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct MerkleProof {
     algorithm: HashingAlgorithm,
-    index: u32,
     hash_size: u8,
-    pub hashes: Vec<u8>
+    index: u32,
+    hashes: Vec<u8>
 }
 
 impl MerkleProof {
-    pub fn new(algorithm: HashingAlgorithm, index: u32, hash_size: u8, hashes: Vec<u8>) -> Self {
+    pub fn new(algorithm: HashingAlgorithm, hash_size: u8, index: u32, hashes: Vec<u8>) -> Self {
         Self {
             algorithm,
             index,
@@ -22,40 +22,63 @@ impl MerkleProof {
         }
     }
 
-    pub fn merklize(&self) -> Result<Vec<u8>> {
-        let size = self.hash_size as usize;
-        if self.hashes.len() == 0 || self.hashes.len() % size != 0 {
+    // Hash with defined hashing algorithm and truncate to defined length
+    pub fn hash(&self, m: &[u8]) -> Vec<u8> {
+        self.algorithm.hash(m, self.hash_size as usize)
+    }
+
+    // Double hash with defined hashing algorithm and truncate to defined length
+    pub fn double_hash(&self, m: &[u8]) -> Vec<u8> {
+        self.algorithm.double_hash(m, self.hash_size as usize)
+    }
+
+    // Merklize from a leaf
+    pub fn merklize(&self, leaf: &[u8]) -> Result<Vec<u8>> {
+        self.merklize_hash_unchecked(&self.double_hash(leaf))
+    }
+
+    // Merklize from a leaf
+    pub fn merklize_hash(&self, hash: &[u8]) -> Result<Vec<u8>> {
+        if hash.len() != self.hash_size as usize {
             return Err(MerkleError::InvalidHashSize.into());
         }
-        let hash_count = self.hashes.len() / size;
-        if hash_count == 1 {
-            return Ok(self.hashes.clone())
+        self.merklize_hash_unchecked(hash)
+    }
+
+    // Merklize from a hash. NOTE: There are no length checks being 
+    pub fn merklize_hash_unchecked(&self, hash: &[u8]) -> Result<Vec<u8>> {
+        let size = self.hash_size as usize;
+        // If the pairing hashes are not a valid length, return an invalid size error
+        if self.hashes.len() % size != 0 {
+            return Err(MerkleError::InvalidHashSize.into());
         }
+        // If there are no pairing hashes, simply return the hashed data
+        if self.hashes.len() == 0 {
+            return Ok(hash.to_vec())
+        }
+        let hash_count = self.hashes.len() / size;
         let mut index = self.index;
-        let mut h: Vec<u8> = self.hashes[0..self.hash_size as usize].to_vec();
-        let mut m = vec![0u8;self.hash_size as usize*2];
-        for i in 1..hash_count {
+        let mut h = hash.to_vec();
+        let mut m = vec![0u8;size*2];
+        for i in 0..hash_count {
             match index%2 == 0 {
                 true => {
-                    m[..self.hash_size as usize].copy_from_slice(&h);
-                    m[self.hash_size as usize..].copy_from_slice(&self.hashes[i*size..size*(i+1)]);
+                    m[..size].copy_from_slice(&h);
+                    m[size..].copy_from_slice(&self.hashes[i*size..size*(i+1)]);
                 },
                 false => {
-                    m[..self.hash_size as usize].copy_from_slice(&self.hashes[i*size..size*(i+1)]);
-                    m[self.hash_size as usize..].copy_from_slice(&h);
+                    m[..size].copy_from_slice(&self.hashes[i*size..size*(i+1)]);
+                    m[size..].copy_from_slice(&h);
                 }
             }
-            h = self.algorithm.hash(&m, self.hash_size as usize);
+            h = self.hash(&m);
             index = index/2
         }
         Ok(h)
     }
 
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut m = self.index.to_le_bytes().to_vec();
-        m.extend_from_slice(&[u8::from(self.algorithm.clone()), self.hash_size]);
-        m.extend_from_slice(&self.hashes);
-        m
+    pub fn to_pairing_hashes(&self) -> Vec<u8> {
+        self.hashes.clone()
     }
 }
 
@@ -70,10 +93,9 @@ mod tests {
     fn test_spv_proof() {
         let spv = MerkleProof::new(
             HashingAlgorithm::Sha256d,
-            0x2f,
             32,
+            0x2f,
             vec![
-                hex!("cd1c00c1726e76669911c9ffbd2975f9966fa8bb23e32bfd33bc439eb4e41167").to_vec(),
                 hex!("780f39009c90be8cc62b1729569b5c8d50b59bad4489e95ac7a839555c1ee795").to_vec(),
                 hex!("5503c702bc9ac972d2dbb46d2534559d2a268a7b06872b279015809a323f3d53").to_vec(),
                 hex!("c7dfdb01537035a4ef485275a727aeb29328e49c1afc4fedac87d9333f059963").to_vec(),
@@ -90,7 +112,9 @@ mod tests {
                 hex!("941e1c1872daf9351606edd68bf125246b99d2cf44ecd1c526fdc06fbfa3d9c9").to_vec()
             ].concat()
         );
-        let merkle = spv.merklize().unwrap();
-        assert_eq!(hex!("e43a1de4dd9c526274b8ea9e4bf01fe8928649f8e5b94abc4e05d83b8abeb924").to_vec(), merkle);
+        assert_eq!(
+            hex!("e43a1de4dd9c526274b8ea9e4bf01fe8928649f8e5b94abc4e05d83b8abeb924").to_vec(), 
+            spv.merklize(&hex!("01000000017125b04467dc2e3e766a0dae2b7a2f74211c7aa7bf796d47fbf44c259be23462661100006b483045022100f1e5fdfd36837a2e84225e157d25f4d341cad49bfdc909e0332e5e5a58e849a102203b5c59d2f5cf4c6f84b2bc189a03ed802d48784f335b712f73e80f807d4cdd714121037d53430715b2bc8463847e79d7e259c11a7d81bf7d6166e003e1b103b65731ffffffffff0123020000000000001976a9140ec56960e83cd3c03c8882e0fd34d462a34c653888ac00000000").to_vec()).unwrap()
+        );
     }
 }
