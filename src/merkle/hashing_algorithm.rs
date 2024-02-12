@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use solana_program::{hash, keccak};
+use solana_program::{blake3::Hash, hash, keccak};
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
 pub enum HashingAlgorithm {
@@ -16,6 +16,17 @@ impl From<HashingAlgorithm> for u8 {
             HashingAlgorithm::Sha256d => 1,
             HashingAlgorithm::Keccak => 2,
             HashingAlgorithm::Keccakd => 3,
+        }
+    }
+}
+
+impl From<u8> for HashingAlgorithm {
+    fn from(value: u8) -> HashingAlgorithm {
+        match value {
+            1 => HashingAlgorithm::Sha256d,
+            2 => HashingAlgorithm::Keccak,
+            3 => HashingAlgorithm::Keccakd,
+            _ => HashingAlgorithm::Sha256,
         }
     }
 }
