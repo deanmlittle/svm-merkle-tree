@@ -1528,7 +1528,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "svm-merkle-tree"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anchor-lang",
  "hex",

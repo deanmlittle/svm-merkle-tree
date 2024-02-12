@@ -1,12 +1,22 @@
 {
-    "name": "svm-merkle-tree",
-    "description": "A rust/wasm/svm-compatible merkle tree",
-    "version": "0.1.0",
-    "files": [
-      "lib/svm_merkle_tree_bg.wasm",
-      "lib/svm_merkle_tree.js",
-      "lib/svm_merkle_tree.d.ts"
-    ],
-    "main": "lib/svm_merkle_tree.js",
-    "types": "lib/svm_merkle_tree.d.ts"
+  "name": "svm-merkle-tree",
+  "description": "A rust/wasm/svm-compatible merkle tree",
+  "version": "0.1.1",
+  "main": "dist/node/svm_merkle_tree.js",
+  "browser": "dist/browser/svm_merkle_tree.js",
+  "types": "dist/node/svm_merkle_tree.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "merkle tree",
+    "rust",
+    "wasm",
+    "svm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deanmlittle/svm-merkle-tree.git"
   }
+}

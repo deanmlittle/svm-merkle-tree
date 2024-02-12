@@ -1,6 +1,6 @@
 [package]
 name = "svm-merkle-tree"
-version = "0.1.0"
+version = "0.1.1"
 description = "A rust/wasm/svm-compatible merkle tree"
 edition = "2021"
 
