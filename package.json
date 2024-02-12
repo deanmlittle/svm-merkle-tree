@@ -3,10 +3,10 @@
     "description": "A rust/wasm/svm-compatible merkle tree",
     "version": "0.1.0",
     "files": [
-      "lib/node/svm_merkle_tree_bg.wasm",
-      "lib/node/svm_merkle_tree.js",
-      "lib/node/svm_merkle_tree.d.ts"
+      "lib/svm_merkle_tree_bg.wasm",
+      "lib/svm_merkle_tree.js",
+      "lib/svm_merkle_tree.d.ts"
     ],
-    "main": "lib/node/svm_merkle_tree.js",
-    "types": "lib/node/svm_merkle_tree.d.ts"
+    "main": "lib/svm_merkle_tree.js",
+    "types": "lib/svm_merkle_tree.d.ts"
   }

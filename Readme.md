@@ -45,4 +45,3 @@ If the number of hashes are odd, it is recommended you implement one of the foll
 - Keep track of the total leaf count in the tree externally
 
 The reason for this is, if you are using a Bitcoin-compatible Merkle tree for some kind of single-use whitelist functionality, the final leaf of an odd tree will be paired with itself. This means the final leaf actually has two valid positions in an odd-length tree.
-
