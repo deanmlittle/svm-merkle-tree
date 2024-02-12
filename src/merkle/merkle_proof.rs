@@ -73,8 +73,11 @@ impl MerkleProof {
                     m[size..].copy_from_slice(&h);
                 }
             }
-            h = self.hash(&m);
-            index = index/2
+            h = match i == hash_count-1 {
+                true => self.algorithm.hash(&m, 32),
+                false => self.hash(&m)
+            };
+            index = index/2;
         }
         Ok(h)
     }

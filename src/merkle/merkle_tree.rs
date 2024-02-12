@@ -129,15 +129,12 @@ impl MerkleTree {
             _ => {
                 self.reset();
                 let mut count = self.hashes[0].len();
-                while count > 1 {
+                while count > 2 {
                     let h: Vec<Vec<u8>> = Self::merklize_unchecked(self.hashes.last().ok_or(MerkleError::BranchOutOfRange)?, self.algorithm.clone(), self.hash_size as usize);
                     count = h.len();
-                    if count > 1 {
-                        self.hashes.push(h);
-                    } else {
-                        self.root = h[0].clone()
-                    }
+                    self.hashes.push(h);
                 }
+                self.root = Self::merklize_unchecked(self.hashes.last().ok_or(MerkleError::BranchOutOfRange)?, self.algorithm.clone(), 32 as usize)[0].clone();
                 Ok(())
             }
         }
@@ -245,6 +242,8 @@ impl MerkleTree {
 #[cfg(test)]
 mod tests {
     use hex_literal::hex;
+    use crate::merkle;
+
     use super::MerkleTree;
 
     #[test]
@@ -346,7 +345,7 @@ mod tests {
 
         assert_eq!(hex!("59f9111666f968b79593c142694cb662").to_vec(), merkle_tree.hashes[0][0]);
         assert_eq!(hex!("61ebf6f4d1af532451e53c2d2a303390").to_vec(), merkle_tree.hashes[0][1]);
-        assert_eq!(hex!("ed89c53c2635102579a7a002249f7c97").to_vec(), merkle_tree.root);
+        assert_eq!(hex!("ed89c53c2635102579a7a002249f7c97460d31ef72baaafd6960be39546c6002").to_vec(), merkle_tree.root);
 
         let proof = merkle_tree.merkle_proof_index(0).unwrap();
         assert_eq!(merkle_tree.root, proof.merklize(&leaf_1).unwrap());
