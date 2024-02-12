@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use solana_program::{hash, keccak};
 
-#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]
+#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
 pub enum HashingAlgorithm {
     Sha256 = 0,
     Sha256d = 1,
