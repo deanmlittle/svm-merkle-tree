@@ -57,6 +57,10 @@ impl MerkleTree {
 impl MerkleTree {
     // Initialize a new tree with configurable size and hashing params
     pub fn new(algorithm: HashingAlgorithm, hash_size: u8) -> Self {
+        let mut hash_size = hash_size;
+        if hash_size == 0 || hash_size > 32 {
+            hash_size = 32
+        }
         Self {
             algorithm,
             root: vec![],
