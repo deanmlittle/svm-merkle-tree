@@ -82,4 +82,8 @@ impl MerkleProof {
     pub fn merklize_hash(&self, hash: &[u8]) -> Result<Vec<u8>, JsError> {
         Ok(self.0.merklize_hash(hash).map_err(|e| JsError::new(&e.to_string()))?)
     }
+
+    pub fn get_pairing_hashes(&self) -> Vec<u8> {
+        self.0.get_pairing_hashes()
+    }
 }

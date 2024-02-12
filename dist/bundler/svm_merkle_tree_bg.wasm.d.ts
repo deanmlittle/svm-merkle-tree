@@ -12,6 +12,7 @@ export function merkletree_merkle_proof_index(a: number, b: number, c: number): 
 export function merkleproof_new(a: number, b: number, c: number, d: number, e: number): number;
 export function merkleproof_merklize(a: number, b: number, c: number, d: number): void;
 export function merkleproof_merklize_hash(a: number, b: number, c: number, d: number): void;
+export function merkleproof_get_pairing_hashes(a: number, b: number): void;
 export function solana_program_init(): void;
 export function __wbg_hash_free(a: number): void;
 export function __wbg_pubkey_free(a: number): void;

@@ -147,6 +147,10 @@ export class MerkleProof {
 * @returns {Uint8Array}
 */
   merklize_hash(hash: Uint8Array): Uint8Array;
+/**
+* @returns {Uint8Array}
+*/
+  get_pairing_hashes(): Uint8Array;
 }
 /**
 */

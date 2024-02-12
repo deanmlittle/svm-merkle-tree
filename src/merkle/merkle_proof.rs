@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
-
 use crate::MerkleError;
-
 use super::HashingAlgorithm;
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]
@@ -81,7 +79,7 @@ impl MerkleProof {
         Ok(h)
     }
 
-    pub fn to_pairing_hashes(&self) -> Vec<u8> {
+    pub fn get_pairing_hashes(&self) -> Vec<u8> {
         self.hashes.clone()
     }
 }
