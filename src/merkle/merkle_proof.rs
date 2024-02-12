@@ -14,6 +14,10 @@ pub struct MerkleProof {
 
 impl MerkleProof {
     pub fn new(algorithm: HashingAlgorithm, hash_size: u8, index: u32, hashes: Vec<u8>) -> Self {
+        let mut hash_size = hash_size;
+        if hash_size == 0 || hash_size > 32 {
+            hash_size = 32
+        }
         Self {
             algorithm,
             index,

@@ -1536,6 +1536,7 @@ dependencies = [
  "rayon",
  "solana-program",
  "thiserror",
+ "wasm-bindgen",
 ]
 
 [[package]]

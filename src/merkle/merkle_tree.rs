@@ -1,11 +1,10 @@
-use anchor_lang::prelude::*;
 #[cfg(not(target_os = "solana"))]
 use rayon::{prelude::*, iter::{IntoParallelIterator,ParallelIterator}};
 use crate::{HashingAlgorithm, MerkleError};
-
+use anchor_lang::Result;
 use super::MerkleProof;
 
-#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]
+#[derive(Debug, Clone)]
 pub struct MerkleTree {
     algorithm: HashingAlgorithm,
     hash_size: u8,
@@ -84,12 +83,12 @@ impl MerkleTree {
     }
 
     // Hash with defined hashing algorithm and truncate to defined length
-    pub fn hash(&self, m: &[u8]) -> Vec<u8> {
+    fn hash(&self, m: &[u8]) -> Vec<u8> {
         self.algorithm.hash(m, self.hash_size as usize)
     }
 
     // Double hash with defined hashing algorithm and truncate to defined length
-    pub fn double_hash(&self, m: &[u8]) -> Vec<u8> {
+    fn double_hash(&self, m: &[u8]) -> Vec<u8> {
         self.algorithm.double_hash(m, self.hash_size as usize)
     }
 
@@ -175,6 +174,11 @@ impl MerkleTree {
     //     let proof = self.merkle_proof_index(index)?;
     //     proof.to_pairing_hashes()
     // }
+
+    pub fn get_merkle_root(&self) -> Result<Vec<u8>> {
+        self.merklized()?;
+        Ok(self.root.clone())
+    }
 
     pub fn get_leaf_hash(&self, i: usize) -> Result<Vec<u8>> {
         self.within_range(i)?;
