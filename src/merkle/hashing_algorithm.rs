@@ -33,6 +33,10 @@ impl From<u8> for HashingAlgorithm {
 
 impl HashingAlgorithm {
     pub fn hash(&self, b: &[u8], s: usize) -> Vec<u8> {
+        let mut s = match s == 0 || s > 32 {
+            true => 32,
+            false => s
+        };
         match self {
             HashingAlgorithm::Sha256 => hash::hash(b).to_bytes()[..s].to_vec(),
             HashingAlgorithm::Keccak => keccak::hash(b).to_bytes()[..s].to_vec(),
@@ -41,6 +45,10 @@ impl HashingAlgorithm {
     }
 
     pub fn double_hash(&self, b: &[u8], s: usize) -> Vec<u8> {
+        let mut s = match s == 0 || s > 32 {
+            true => 32,
+            false => s
+        };
         match self {
             HashingAlgorithm::Sha256 | HashingAlgorithm::Sha256d => hash::hash(&hash::hash(b).to_bytes()).to_bytes()[..s].to_vec(),
             HashingAlgorithm::Keccak | HashingAlgorithm::Keccakd => keccak::hash(&keccak::hash(b).to_bytes()).to_bytes()[..s].to_vec(),

@@ -36,19 +36,27 @@ impl MerkleProof {
 
     // Merklize from a leaf
     pub fn merklize(&self, leaf: &[u8]) -> Result<Vec<u8>> {
-        self.merklize_hash_unchecked(&self.double_hash(leaf))
+        // If our pairing hashes are empty, return the untruncated hash
+        match self.hashes.len() == 0 {
+            true => Ok(self.algorithm.double_hash(leaf, 0)),
+            false => self.merklize_hash_unchecked(&self.double_hash(leaf))
+        }
     }
 
     // Merklize from a leaf
     pub fn merklize_hash(&self, hash: &[u8]) -> Result<Vec<u8>> {
+        // If pairing hashes are empty and our hash is 32 bytes long, return early
         if hash.len() != self.hash_size as usize {
-            return Err(MerkleError::InvalidHashSize.into());
+            match self.hashes.is_empty() && hash.len() == 32 {
+                true => return Ok(hash.to_vec()),
+                false => return Err(MerkleError::InvalidHashSize.into())
+            }
         }
         self.merklize_hash_unchecked(hash)
     }
 
-    // Merklize from a hash. NOTE: There are no length checks being 
-    pub fn merklize_hash_unchecked(&self, hash: &[u8]) -> Result<Vec<u8>> {
+    // Merklize from a hash. NOTE: There are no length checks being performed here.
+    fn merklize_hash_unchecked(&self, hash: &[u8]) -> Result<Vec<u8>> {
         let size = self.hash_size as usize;
         // If the pairing hashes are not a valid length, return an invalid size error
         if self.hashes.len() % size != 0 {

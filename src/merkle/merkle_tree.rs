@@ -242,7 +242,7 @@ impl MerkleTree {
 #[cfg(test)]
 mod tests {
     use hex_literal::hex;
-    use crate::merkle;
+    use crate::{merkle, HashingAlgorithm, MerkleProof};
 
     use super::MerkleTree;
 
@@ -351,5 +351,29 @@ mod tests {
         assert_eq!(merkle_tree.root, proof.merklize(&leaf_1).unwrap());
         let proof2 = merkle_tree.merkle_proof_index(1).unwrap();
         assert_eq!(merkle_tree.root, proof2.merklize(&leaf_2).unwrap());
+    }
+
+    #[test]
+    fn test_airdrop() {
+        let mut merkle_tree = MerkleTree::new(crate::HashingAlgorithm::Sha256, 20);
+        merkle_tree.add_leaves(
+            &vec![
+                hex!("00000000010039050000000000004cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29").to_vec(), // Sol
+                hex!("01000000020039050000000000007e5f4552091a69125d5dfcb7b8c2659029395bdf").to_vec(), // Eth
+                hex!("0200000021003905000000000000d0c2c91eda34bbfbaec6cfb9c7bb913e57dab3cbec4018a4b3f5e55531cd63af").to_vec(), // Sui
+                hex!("03000000220039050000000000004cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29").to_vec() // Aptos
+            ]
+        ).unwrap();
+        merkle_tree.merklize().unwrap();
+
+        let proof = MerkleProof::new(HashingAlgorithm::Sha256, 20, 0, merkle_tree.merkle_proof_index(0).unwrap().get_pairing_hashes());
+        let proof_root = proof.merklize(&hex!("00000000010039050000000000004cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29")).unwrap();
+        // sol_log(&format!("{:?}", self.to_leaf_preimage()));
+        // sol_log(&format!("{:?}", proof_root));
+        // require!(root.eq(&proof_root), AirdropError::InvalidMerkleProof);
+        // Ok(())
+        println!("{:?}", hex::encode(merkle_tree.get_merkle_root().unwrap()));
+        println!("{:?}", hex::encode(proof_root))
+        
     }
 }
