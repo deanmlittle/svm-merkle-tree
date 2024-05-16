@@ -3,7 +3,8 @@ use wasm_bindgen::prelude::*;
 use crate::{
     HashingAlgorithm as RustHashingAlgorithm, 
     MerkleProof as RustMerkleProof,
-    MerkleTree as RustMerkleTree
+    MerkleTree as RustMerkleTree,
+    hashing_wasm::{sha256 as sha256_hash, keccak256 as keccak256_hash}
 };
 
 #[wasm_bindgen]
@@ -12,6 +13,16 @@ pub enum HashingAlgorithm {
     Sha256d = 1,
     Keccak = 2,
     Keccakd = 3
+}
+
+#[wasm_bindgen]
+pub fn sha256(val: Vec<u8>) -> Vec<u8> {
+    sha256_hash(&val).to_vec()
+}
+
+#[wasm_bindgen]
+pub fn keccak256(val: Vec<u8>) -> Vec<u8> {
+    keccak256_hash(&val).to_vec()
 }
 
 impl From<HashingAlgorithm> for RustHashingAlgorithm {

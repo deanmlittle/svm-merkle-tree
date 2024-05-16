@@ -1,7 +1,51 @@
-use anchor_lang::prelude::*;
-use solana_program::{blake3::Hash, hash, keccak};
+#[cfg(target_arch = "wasm32")]
+pub mod hashing_wasm {
+    use sha2::{Sha256, Digest};
+    use sha3::Keccak256;
 
+    pub fn sha256(val: &[u8]) -> [u8;32] {
+        let mut hasher = Sha256::new();
+        hasher.update(val);
+        hasher.finalize().into()
+    }
+
+    pub fn keccak256(val: &[u8]) -> [u8;32] {
+        let mut hasher = Keccak256::new();
+        hasher.update(val);
+        hasher.finalize().into()
+    }
+}
+#[cfg(target_arch = "wasm32")]
+use hashing_wasm::{sha256, keccak256};
+
+#[cfg(not(target_arch = "wasm32"))]
+use anchor_lang::prelude::*;
+#[cfg(not(target_arch = "wasm32"))]
+mod hashing {
+    use solana_program::{hash, keccak};
+
+    pub fn sha256(val: &[u8]) -> [u8;32] {
+        hash::hash(val).to_bytes()
+    }
+
+    pub fn keccak256(val: &[u8]) -> [u8;32] {
+        keccak::hash(val).to_bytes()
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+use hashing::{sha256, keccak256};
+
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
+pub enum HashingAlgorithm {
+    Sha256 = 0,
+    Sha256d = 1,
+    Keccak = 2,
+    Keccakd = 3
+}
+
+#[cfg(target_arch = "wasm32")]
+#[derive(Debug, Clone, PartialEq)]
 pub enum HashingAlgorithm {
     Sha256 = 0,
     Sha256d = 1,
@@ -38,8 +82,8 @@ impl HashingAlgorithm {
             false => s
         };
         match self {
-            HashingAlgorithm::Sha256 => hash::hash(b).to_bytes()[..s].to_vec(),
-            HashingAlgorithm::Keccak => keccak::hash(b).to_bytes()[..s].to_vec(),
+            HashingAlgorithm::Sha256 => sha256(b)[..s].to_vec(),
+            HashingAlgorithm::Keccak => keccak256(b)[..s].to_vec(),
             HashingAlgorithm::Sha256d | HashingAlgorithm::Keccakd => self.double_hash(b, s)
         }
     }
@@ -50,8 +94,8 @@ impl HashingAlgorithm {
             false => s
         };
         match self {
-            HashingAlgorithm::Sha256 | HashingAlgorithm::Sha256d => hash::hash(&hash::hash(b).to_bytes()).to_bytes()[..s].to_vec(),
-            HashingAlgorithm::Keccak | HashingAlgorithm::Keccakd => keccak::hash(&keccak::hash(b).to_bytes()).to_bytes()[..s].to_vec(),
+            HashingAlgorithm::Sha256 | HashingAlgorithm::Sha256d => sha256(&sha256(b))[..s].to_vec(),
+            HashingAlgorithm::Keccak | HashingAlgorithm::Keccakd => keccak256(&keccak256(b))[..s].to_vec(),
         }
     }
 }

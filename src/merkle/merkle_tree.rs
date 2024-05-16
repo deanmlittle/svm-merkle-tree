@@ -1,6 +1,9 @@
 #[cfg(not(target_os = "solana"))]
 use rayon::{prelude::*, iter::{IntoParallelIterator,ParallelIterator}};
+#[cfg(not(target_os = "solana"))]
+use anyhow::Result;
 use crate::{HashingAlgorithm, MerkleError};
+#[cfg(target_os = "solana")]
 use anchor_lang::Result;
 use super::MerkleProof;
 
@@ -368,10 +371,6 @@ mod tests {
 
         let proof = MerkleProof::new(HashingAlgorithm::Sha256, 20, 0, merkle_tree.merkle_proof_index(0).unwrap().get_pairing_hashes());
         let proof_root = proof.merklize(&hex!("00000000010039050000000000004cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29")).unwrap();
-        // sol_log(&format!("{:?}", self.to_leaf_preimage()));
-        // sol_log(&format!("{:?}", proof_root));
-        // require!(root.eq(&proof_root), AirdropError::InvalidMerkleProof);
-        // Ok(())
         println!("{:?}", hex::encode(merkle_tree.get_merkle_root().unwrap()));
         println!("{:?}", hex::encode(proof_root))
         

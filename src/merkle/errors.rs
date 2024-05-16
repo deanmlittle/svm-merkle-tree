@@ -1,5 +1,11 @@
+#[cfg(not(target_arch = "wasm32"))]
 use anchor_lang::error::{AnchorError, Error, ERROR_CODE_OFFSET};
 use thiserror::Error;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub type Result<T> = anchor_lang::Result<T>;
+#[cfg(target_arch = "wasm32")]
+pub type Result<T> = anyhow::Result<T, MerkleError>;
 
 #[derive(Debug, Error)]
 pub enum MerkleError {
@@ -17,6 +23,7 @@ pub enum MerkleError {
     InvalidHashSize,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl From<MerkleError> for anchor_lang::error::Error {
     fn from(value: MerkleError) -> Self {
         let e = match value {

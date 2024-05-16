@@ -1,7 +1,17 @@
+#[cfg(not(target_arch = "wasm32"))]
 use anchor_lang::prelude::*;
-use crate::MerkleError;
+use crate::{MerkleError, Result};
 use super::HashingAlgorithm;
 
+#[cfg(target_arch = "wasm32")]
+#[derive(Debug, Clone)]
+pub struct MerkleProof {
+    algorithm: HashingAlgorithm,
+    hash_size: u8,
+    index: u32,
+    hashes: Vec<u8>
+}
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct MerkleProof {
     algorithm: HashingAlgorithm,
