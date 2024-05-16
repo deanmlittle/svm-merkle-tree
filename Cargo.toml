@@ -17,8 +17,8 @@ idl-build = ["anchor-lang/idl-build"]
 default = ["standard"]
 standard = ["sha2", "sha3", "rayon"]
 wasm = ["wasm-bindgen", "sha2", "sha3"]
-solana = ["solana-program"]
 anchor = ["anchor-lang", "solana"]
+solana = ["solana-program"]
 
 [profile.release]
 lto = true

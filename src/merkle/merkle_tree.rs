@@ -28,7 +28,7 @@ impl MerkleTree {
         }).collect()
     }
 
-    fn add_leaves(&mut self, leaves: &Vec<Vec<u8>>) -> Result<()> {
+    pub fn add_leaves(&mut self, leaves: &Vec<Vec<u8>>) -> Result<()> {
         let hashes: Vec<Vec<u8>> = leaves.into_par_iter().map(|leaf| {
             self.double_hash(leaf)
         }).collect();
@@ -49,7 +49,7 @@ impl MerkleTree {
         }).collect()
     }
 
-    fn add_leaves(&mut self, leaves: &Vec<Vec<u8>>) -> Result<()> {
+    pub fn add_leaves(&mut self, leaves: &Vec<Vec<u8>>) -> Result<()> {
         let hashes: Vec<Vec<u8>> = leaves.into_iter().map(|leaf| {
             self.double_hash(leaf)
         }).collect();
@@ -71,7 +71,7 @@ impl MerkleTree {
             hashes: vec![vec![]]
         }
     }
-
+    
     // Append multiple hashes with a length check. Use with unnormalized data
     pub fn add_hashes(&mut self, hashes: Vec<Vec<u8>>) -> Result<()> {
         for hash in hashes.iter() {
@@ -87,11 +87,6 @@ impl MerkleTree {
     pub fn add_hashes_unchecked(&mut self, hashes: Vec<Vec<u8>>) -> Result<()> {
         self.hashes[0].extend_from_slice(&hashes);
         Ok(())
-    }
-
-    // Hash with defined hashing algorithm and truncate to defined length
-    fn hash(&self, m: &[u8]) -> Vec<u8> {
-        self.algorithm.hash(m, self.hash_size as usize)
     }
 
     // Double hash with defined hashing algorithm and truncate to defined length

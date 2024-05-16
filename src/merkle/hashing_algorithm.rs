@@ -35,17 +35,8 @@ mod hashing {
 #[cfg(not(target_arch = "wasm32"))]
 use hashing::{sha256, keccak256};
 
-#[cfg(not(target_arch = "wasm32"))]
-#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
-pub enum HashingAlgorithm {
-    Sha256 = 0,
-    Sha256d = 1,
-    Keccak = 2,
-    Keccakd = 3
-}
-
-#[cfg(target_arch = "wasm32")]
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(not(target_arch = "wasm32"), derive(AnchorSerialize, AnchorDeserialize))]
 pub enum HashingAlgorithm {
     Sha256 = 0,
     Sha256d = 1,
@@ -77,7 +68,7 @@ impl From<u8> for HashingAlgorithm {
 
 impl HashingAlgorithm {
     pub fn hash(&self, b: &[u8], s: usize) -> Vec<u8> {
-        let mut s = match s == 0 || s > 32 {
+        let s = match s == 0 || s > 32 {
             true => 32,
             false => s
         };
@@ -89,7 +80,7 @@ impl HashingAlgorithm {
     }
 
     pub fn double_hash(&self, b: &[u8], s: usize) -> Vec<u8> {
-        let mut s = match s == 0 || s > 32 {
+        let s = match s == 0 || s > 32 {
             true => 32,
             false => s
         };
