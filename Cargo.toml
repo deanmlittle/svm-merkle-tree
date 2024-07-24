@@ -15,7 +15,7 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 idl-build = ["anchor-lang/idl-build"]
 default = ["standard"]
-standard = ["sha2", "sha3", "rayon"]
+standard = ["sha2", "sha3"]
 wasm = ["wasm-bindgen", "sha2", "sha3"]
 anchor = ["anchor-lang", "solana"]
 solana = ["solana-program"]
@@ -34,6 +34,10 @@ hex-literal = "0.4.1"
 hex = "0.4.3"
 thiserror = "1.0.56"
 anyhow = "1.0.83"
+
+[target.'cfg(all(not(target_arch = "wasm32"), not(target_os = "solana")))'.dependencies]
+rayon = { version = "1.10.0" }
+
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 anchor-lang = { version = "0.30.1" }
 solana-program = { version = "1.18.18" }
