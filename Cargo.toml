@@ -35,7 +35,7 @@ hex = "0.4.3"
 thiserror = "1.0.56"
 anyhow = "1.0.83"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-anchor-lang = { version = "0.30.0" }
+anchor-lang = { version = "0.30.1" }
 solana-program = { version = "1.18.18" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
