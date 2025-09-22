@@ -24,50 +24,53 @@ pub enum MerkleError {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::identity_op)]
 impl From<MerkleError> for anchor_lang::error::Error {
     fn from(value: MerkleError) -> Self {
+        use alloc::{boxed::Box, string::ToString};
+
         let e = match value {
             MerkleError::LeafOutOfRange => AnchorError {
                 error_name: "LeafOutOfRange".to_string(),
                 error_code_number: ERROR_CODE_OFFSET + 1337 + 0,
                 error_msg: value.to_string(),
                 error_origin: None,
-                compared_values: None
+                compared_values: None,
             },
             MerkleError::BranchOutOfRange => AnchorError {
                 error_name: "BranchOutOfRange".to_string(),
                 error_code_number: ERROR_CODE_OFFSET + 1337 + 1,
                 error_msg: value.to_string(),
                 error_origin: None,
-                compared_values: None
+                compared_values: None,
             },
             MerkleError::LeafNotFound => AnchorError {
                 error_name: "LeafNotFound".to_string(),
                 error_code_number: ERROR_CODE_OFFSET + 1337 + 2,
                 error_msg: value.to_string(),
                 error_origin: None,
-                compared_values: None
+                compared_values: None,
             },
             MerkleError::TreeNotMerklized => AnchorError {
                 error_name: "TreeNotMerklized".to_string(),
                 error_code_number: ERROR_CODE_OFFSET + 1337 + 3,
                 error_msg: value.to_string(),
                 error_origin: None,
-                compared_values: None
+                compared_values: None,
             },
             MerkleError::TreeEmpty => AnchorError {
                 error_name: "TreeEmpty".to_string(),
                 error_code_number: ERROR_CODE_OFFSET + 1337 + 4,
                 error_msg: value.to_string(),
                 error_origin: None,
-                compared_values: None
+                compared_values: None,
             },
             MerkleError::InvalidHashSize => AnchorError {
                 error_name: "InvalidHashSize".to_string(),
                 error_code_number: ERROR_CODE_OFFSET + 1337 + 5,
                 error_msg: value.to_string(),
                 error_origin: None,
-                compared_values: None
+                compared_values: None,
             },
         };
         Error::AnchorError(Box::new(e))

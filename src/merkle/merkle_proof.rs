@@ -1,15 +1,21 @@
+use alloc::vec;
+use alloc::vec::Vec;
 #[cfg(not(target_arch = "wasm32"))]
 use anchor_lang::prelude::*;
-use crate::{MerkleError, Result};
+
 use super::HashingAlgorithm;
+use crate::{MerkleError, Result};
 
 #[derive(Debug, Clone)]
-#[cfg_attr(not(target_arch = "wasm32"), derive(AnchorSerialize, AnchorDeserialize))]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(AnchorSerialize, AnchorDeserialize)
+)]
 pub struct MerkleProof {
     algorithm: HashingAlgorithm,
     hash_size: u8,
     index: u32,
-    hashes: Vec<u8>
+    hashes: Vec<u8>,
 }
 
 impl MerkleProof {
@@ -22,7 +28,7 @@ impl MerkleProof {
             algorithm,
             index,
             hash_size,
-            hashes
+            hashes,
         }
     }
 
@@ -39,9 +45,9 @@ impl MerkleProof {
     // Merklize from a leaf
     pub fn merklize(&self, leaf: &[u8]) -> Result<Vec<u8>> {
         // If our pairing hashes are empty, return the untruncated hash
-        match self.hashes.len() == 0 {
+        match self.hashes.is_empty() {
             true => Ok(self.algorithm.double_hash(leaf, 0)),
-            false => self.merklize_hash_unchecked(&self.double_hash(leaf))
+            false => self.merklize_hash_unchecked(&self.double_hash(leaf)),
         }
     }
 
@@ -51,7 +57,7 @@ impl MerkleProof {
         if hash.len() != self.hash_size as usize {
             match self.hashes.is_empty() && hash.len() == 32 {
                 true => return Ok(hash.to_vec()),
-                false => return Err(MerkleError::InvalidHashSize.into())
+                false => return Err(MerkleError::InvalidHashSize.into()),
             }
         }
         self.merklize_hash_unchecked(hash)
@@ -65,29 +71,29 @@ impl MerkleProof {
             return Err(MerkleError::InvalidHashSize.into());
         }
         // If there are no pairing hashes, simply return the hashed data
-        if self.hashes.len() == 0 {
-            return Ok(hash.to_vec())
+        if self.hashes.is_empty() {
+            return Ok(hash.to_vec());
         }
         let hash_count = self.hashes.len() / size;
         let mut index = self.index;
         let mut h = hash.to_vec();
-        let mut m = vec![0u8;size*2];
+        let mut m = vec![0u8; size * 2];
         for i in 0..hash_count {
-            match index%2 == 0 {
+            match index % 2 == 0 {
                 true => {
                     m[..size].copy_from_slice(&h);
-                    m[size..].copy_from_slice(&self.hashes[i*size..size*(i+1)]);
-                },
+                    m[size..].copy_from_slice(&self.hashes[i * size..size * (i + 1)]);
+                }
                 false => {
-                    m[..size].copy_from_slice(&self.hashes[i*size..size*(i+1)]);
+                    m[..size].copy_from_slice(&self.hashes[i * size..size * (i + 1)]);
                     m[size..].copy_from_slice(&h);
                 }
             }
-            h = match i == hash_count-1 {
+            h = match i == hash_count - 1 {
                 true => self.algorithm.hash(&m, 32),
-                false => self.hash(&m)
+                false => self.hash(&m),
             };
-            index = index/2;
+            index /= 2;
         }
         Ok(h)
     }
@@ -99,9 +105,9 @@ impl MerkleProof {
 
 #[cfg(test)]
 mod tests {
-    use crate::merkle::HashingAlgorithm;
-
     use super::MerkleProof;
+    use crate::merkle::HashingAlgorithm;
+    use alloc::vec;
     use hex_literal::hex;
 
     #[test]
@@ -124,12 +130,13 @@ mod tests {
                 hex!("169149cacf761b5533d74e9c7f2c6e01ec0fba86466c86e62c3fd9fbd1462fdd").to_vec(),
                 hex!("558d9e2aedfc65fc8d583ddca868fa29acebaa190e42f35b8912fe353d331e64").to_vec(),
                 hex!("fd0ae5310b7ef3e52b1c4d2cd7e99dd0553259394f44b8b71a0ad36918c6b2d9").to_vec(),
-                hex!("941e1c1872daf9351606edd68bf125246b99d2cf44ecd1c526fdc06fbfa3d9c9").to_vec()
-            ].concat()
+                hex!("941e1c1872daf9351606edd68bf125246b99d2cf44ecd1c526fdc06fbfa3d9c9").to_vec(),
+            ]
+            .concat(),
         );
         assert_eq!(
             hex!("e43a1de4dd9c526274b8ea9e4bf01fe8928649f8e5b94abc4e05d83b8abeb924").to_vec(), 
-            spv.merklize(&hex!("01000000017125b04467dc2e3e766a0dae2b7a2f74211c7aa7bf796d47fbf44c259be23462661100006b483045022100f1e5fdfd36837a2e84225e157d25f4d341cad49bfdc909e0332e5e5a58e849a102203b5c59d2f5cf4c6f84b2bc189a03ed802d48784f335b712f73e80f807d4cdd714121037d53430715b2bc8463847e79d7e259c11a7d81bf7d6166e003e1b103b65731ffffffffff0123020000000000001976a9140ec56960e83cd3c03c8882e0fd34d462a34c653888ac00000000").to_vec()).unwrap()
+            spv.merklize(&hex!("01000000017125b04467dc2e3e766a0dae2b7a2f74211c7aa7bf796d47fbf44c259be23462661100006b483045022100f1e5fdfd36837a2e84225e157d25f4d341cad49bfdc909e0332e5e5a58e849a102203b5c59d2f5cf4c6f84b2bc189a03ed802d48784f335b712f73e80f807d4cdd714121037d53430715b2bc8463847e79d7e259c11a7d81bf7d6166e003e1b103b65731ffffffffff0123020000000000001976a9140ec56960e83cd3c03c8882e0fd34d462a34c653888ac00000000")).unwrap()
         );
     }
 }
