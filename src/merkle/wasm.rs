@@ -1,10 +1,9 @@
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    HashingAlgorithm as RustHashingAlgorithm, 
-    MerkleProof as RustMerkleProof,
+    hashing_wasm::{keccak256 as keccak256_hash, sha256 as sha256_hash},
+    HashingAlgorithm as RustHashingAlgorithm, MerkleProof as RustMerkleProof,
     MerkleTree as RustMerkleTree,
-    hashing_wasm::{sha256 as sha256_hash, keccak256 as keccak256_hash}
 };
 
 #[wasm_bindgen]
@@ -12,7 +11,7 @@ pub enum HashingAlgorithm {
     Sha256 = 0,
     Sha256d = 1,
     Keccak = 2,
-    Keccakd = 3
+    Keccakd = 3,
 }
 
 #[wasm_bindgen]
@@ -28,7 +27,7 @@ pub fn keccak256(val: Vec<u8>) -> Vec<u8> {
 impl From<HashingAlgorithm> for RustHashingAlgorithm {
     fn from(value: HashingAlgorithm) -> Self {
         match value {
-            HashingAlgorithm::Sha256 => RustHashingAlgorithm::Sha256 ,
+            HashingAlgorithm::Sha256 => RustHashingAlgorithm::Sha256,
             HashingAlgorithm::Sha256d => RustHashingAlgorithm::Sha256d,
             HashingAlgorithm::Keccak => RustHashingAlgorithm::Keccak,
             HashingAlgorithm::Keccakd => RustHashingAlgorithm::Keccakd,
@@ -39,7 +38,6 @@ impl From<HashingAlgorithm> for RustHashingAlgorithm {
 #[wasm_bindgen]
 pub struct MerkleTree(RustMerkleTree);
 
-
 #[wasm_bindgen]
 pub struct MerkleProof(RustMerkleProof);
 
@@ -49,7 +47,7 @@ impl MerkleTree {
     pub fn new(algorithm: HashingAlgorithm, hash_size: u8) -> Self {
         Self(RustMerkleTree::new(
             RustHashingAlgorithm::from(algorithm),
-            hash_size
+            hash_size,
         ))
     }
 
@@ -62,15 +60,25 @@ impl MerkleTree {
     }
 
     pub fn get_merkle_root(&self) -> Result<Vec<u8>, JsError> {
-        self.0.get_merkle_root().map_err(|e| JsError::new(&e.to_string()))
+        self.0
+            .get_merkle_root()
+            .map_err(|e| JsError::new(&e.to_string()))
     }
 
     pub fn merkle_proof_hash(&self, hash: Vec<u8>) -> Result<MerkleProof, JsError> {
-        Ok(MerkleProof(self.0.merkle_proof_hash(hash).map_err(|e| JsError::new(&e.to_string()))?))
+        Ok(MerkleProof(
+            self.0
+                .merkle_proof_hash(hash)
+                .map_err(|e| JsError::new(&e.to_string()))?,
+        ))
     }
 
     pub fn merkle_proof_index(&self, i: usize) -> Result<MerkleProof, JsError> {
-        Ok(MerkleProof(self.0.merkle_proof_index(i).map_err(|e| JsError::new(&e.to_string()))?))
+        Ok(MerkleProof(
+            self.0
+                .merkle_proof_index(i)
+                .map_err(|e| JsError::new(&e.to_string()))?,
+        ))
     }
 }
 
@@ -82,16 +90,22 @@ impl MerkleProof {
             RustHashingAlgorithm::from(algorithm),
             hash_size,
             index,
-            hashes
+            hashes,
         ))
     }
 
     pub fn merklize(&self, leaf: &[u8]) -> Result<Vec<u8>, JsError> {
-        Ok(self.0.merklize(leaf).map_err(|e| JsError::new(&e.to_string()))?)
+        Ok(self
+            .0
+            .merklize(leaf)
+            .map_err(|e| JsError::new(&e.to_string()))?)
     }
 
     pub fn merklize_hash(&self, hash: &[u8]) -> Result<Vec<u8>, JsError> {
-        Ok(self.0.merklize_hash(hash).map_err(|e| JsError::new(&e.to_string()))?)
+        Ok(self
+            .0
+            .merklize_hash(hash)
+            .map_err(|e| JsError::new(&e.to_string()))?)
     }
 
     pub fn get_pairing_hashes(&self) -> Vec<u8> {
